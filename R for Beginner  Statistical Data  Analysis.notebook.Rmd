@@ -1,0 +1,337 @@
+---
+title: "R Notebook for Statistical Analysis of Data"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+###----------performing different statistical operations on given Dataset-------------### 
+
+library(ggplot2)
+data(diamonds)
+View(diamonds)
+
+diamonds[[4]] # i prefer component indexing
+diamonds[, 5] # all rows of column 5 i.e "depth"
+diamonds[20060,5] # here i extract 20060th value of 5th column
+attach(diamonds)
+
+ls(1) # shows objects in .Global.Env
+search()
+
+ls(2) # shows objects in pos. 2 (diamonds) i,e (carat ,cut,color,..,z)
+# detach() is use to rm diampnds data frame from search path
+diamonds[c(2,3,6)] # diamonds[c("cut","color","table"),drop=TRUE] here i extract 1,2 & 6th column 
+diamonds[,c(2,3,6),drop=FALSE]
+
+subset(x=diamonds, select=c(5:10)) # if you want to SELECT SUBSET of dataset
+
+```
+
+Next chunk- :)
+```{r}
+data(package= .packages(all.available=TRUE)) # to view datasets for all installed packages
+data(package="ggplot2") # to view all datasets for perticular package
+
+str(diamonds)
+attach(diamonds)
+na.omit(diamonds)        # remove rows[e.g 178,32050,51024:51026] which contain NA values from diamonds dataset
+complete.cases(diamonds)  # to extract all rows of diamonds have no missing values  
+summary(diamonds)
+is.na(diamonds)
+depth[!is.na(depth)]     # if you want to extract non missing values of a vector/matrix
+class(diamonds)
+
+library(dplyr)
+library(tidyr)  
+library(tidyverse) # is the core library contains both tidyr & dplyr 
+glimpse(diamonds)        # transpose of str
+Modified_data = diamonds |> 
+       mutate(price_per_caret=price/carat) |>
+                      arrange(desc(table)) |>
+                            rename(tab= table,x1=x) |> group_by(cut)
+head(Modified_data,10)
+
+xtabs(~clarity+cut)
+Cont_table=table(clarity,color)
+with(diamonds,table(clarity,color)) # both commands will work same
+with(diamonds,xtabs(~clarity+color)) # both commands will work same
+
+margin(Cont_table)         # will give you data like [1] 42points   1370points 2083points .... 51points
+margin.table(Cont_table,2) # will provide total count vertically. use 1 for horizontally
+addmargins(Cont_table)     # this will add a column of row total named as "sum" to contigency table
+prop.table(Cont_table,1)   # will provide row wise proportion, similarly replace 1 by 2 to get columnwise
+with(diamonds,ftable(clarity,cut,color)) # use ftable() to get more compact output when dealing with 3 way table
+cut_depth=cut(depth,breaks=5)   # [ cut(,) functions]what happens actually here is i convert a quantitative variabme name "depth" into a classes by, making 10 intervals and coding to every numerical value of "depth"
+cut_price=cut(price,breaks=5)
+levels(cut_depth);levels(cut_price)
+table(cut_depth,cut_price)        # here you'll note the change
+plot(table(cut_depth,cut_price),xlab="intervals",ylab="inclusion",main="Reduction Plot")  # will get a mosaic plot
+
+frame_1=within(diamonds,expr={
+      c1=cut(depth,breaks=6,include.lowest=TRUE)
+      f1=factor(c1,labels=c("bottom","down","below","up","high","top"))
+      })
+head(frame_1,6)
+levels(frame_1$c1)
+
+
+filter_data_as_per_requirement = diamonds |>
+                filter(price>3000 & price <3100) |>
+                            filter(cut=='Premium')
+                              
+head(filter_data_as_per_requirement,10)
+
+xtabs(~clarity+cut)
+Cont_table=table(clarity,color)
+with(diamonds,table(clarity,color)) # both commands will work same
+with(diamonds,xtabs(~clarity+color)) # both commands will work same
+distinct_cut_data = Modified_data |> distinct(cut)
+
+```
+
+Data Transformation & EDA usig 'dlookr' and 'tidyverse'- :)
+
+```{r}
+#-------------------- Data Transformation With [dplyr] ---------------------#
+
+library(tidyverse)
+library(nycflights13)
+data(flights)
+View(flights)
+attach(flights)
+filter(flights, hour >10 , carrier== c("UA","DL"))  # filter() allow us to subset observations according to their values
+(my_filtered_data=filter(flights,day==20,month==10,year==2013) |>
+                           filter(hour < 12,origin=="JFK"))
+typeof(flights$origin)
+1/49 * 49 ==1
+near(1/49 * 49,1)
+filter(flights, month==11 | month==12)
+filter(flights, month %in% c(11,12))
+#----- Missing Values ------#
+NA > 5
+10 == NA
+NA +10
+NA/4
+NA==NA
+filter(flights,is.na(dep_time) | dep_time > 10)
+filter(flights, is.na(arr_delay) | arr_delay>=2)
+filter(flights,origin %in% c("IAH","HOU"))
+library(dlookr)
+library(flextable)
+new_flight=imputate_na(flights,dep_delay,method="median") 
+                                   
+arrange(flights,year,hour,day,month)
+filter(flights,day==27,month==7,year==2013,dep_time=="NA")
+arrange(flights, desc(hour))  
+arrange(flights,desc(arr_time))          # Missing values are always sorted at the end:
+arrange(flights,desc(is.na(arr_time)))   # to sort all NA to the start
+max(dep_delay,na.rm=T)
+filter(flights,dep_delay==max(dep_delay,na.rm=T))
+arrange(flights,desc(dep_delay<=max(dep_delay,na.rm=T)))
+min(flights$arr_time,na.rm = T)
+max(distance)
+filter(flights,distance==max(distance)) |> 
+                         select(flight) |> flextable()
+min(arr_time,na.rm=T)
+arrange(flights,desc(arr_time==min(arr_time,na.rm=T)))
+max(arr_time,na.rm=T)
+filter(flights,arr_time==max(arr_time,na.rm = T)) |> 
+            select(flight,tailnum,air_time)
+select(flights,(distance:time_hour))
+select(flights,-c(arr_delay,dep_delay,flight))
+select(flights,-(9:19))
+flights |> select(9:19)
+
+
+(flights |> rename(c("Hava_Havai"= air_time, "model"= flight)) |> flextable())
+
+(new_flights_data=select(flights,arr_time:air_time,ends_with("delay"),distance))
+
+mutate(new_flights_data, gain = arr_delay - dep_delay , speed= distance / air_time * 60) |> flextable()
+
+# if you only want to keep new variable use transmute()
+Sam_1=sample(flights$dep_delay,500,replace=FALSE)
+shapiro.test(Sam_1)
+
+transmute(flights, normalised_dep_delay= ((imputate_na(flights,dep_delay ,method="median") - mean(dep_delay, na.rm=T))/sd(dep_delay,na.rm=T)))
+
+# Modular arithematic (%/% & %%)
+transmute(flights , Hour=dep_time %/% 100,minute =dep_delay %% 100) |> flextable()
+
+```
+
+Exploratory Data Analysis- :) 
+
+```{r}
+#________________________________________________________________________________________________________________
+   
+    #----------------------# FOR EDA (IMPUTATION,TRANSFORMATION,EXPLORATION,DIAGNOSOS)#------------------------#
+#__________________________________________________________________________________________________________________
+
+library(ggplot2)
+library(tidyverse)
+library(dlookr)
+library(flextable)
+data(diamonds) 
+diagnose_numeric(diamonds) |>
+                               flextable()
+diagnose_category(diamonds) |>
+                               flextable()
+diagnose_outlier(diamonds) |> 
+                              flextable()
+describe(diamonds) |>
+                       flextable()
+diamonds |> describe(carat,price) |>
+                                 flextable()
+
+# some sampling concepts ignore if you not find neccessary
+
+set.seed(123) # ensures reproduciability
+sample.size=500
+srs_sample=sample(diamonds$carat,sample.size,replace=FALSE)
+mean_srs=mean(srs_sample)
+sample_sd=sd(srs_sample)
+se_sample=sqrt((1/500 -1/53940)*(sample_sd^2))
+z_score=1.96          # for 95% C.I
+moe=z_score*se_sample
+lower_bound=mean_srs-moe
+upper_bound=mean_srs+moe
+Confidence_Interval=c(lower_bound,upper_bound)
+Confidence_Interval
+
+# Stratified sampling
+
+strata_size=100
+stratified_sample= diamonds |>
+                 group_by(color) |>
+                   sample_n(strata_size)
+stratified_carat_sample=stratified_sample$carat
+mean_stratified_sample=mean(stratified_carat_sample)
+
+diamonds |> describe(price,statistics=c("mean","sd","IQR","mean_se"))|>
+                                                                    flextable()
+
+diamonds |> diagnose_numeric(carat,depth)  
+# how diagnose_numeric() is differ from summary()base R [it contains zero,minus,outlier columns also]
+summary(carat)             # verified
+
+P=diamonds |> group_by(clarity) |>
+                             select(x,z) |>
+                                        describe() |> flextable()
+
+diamonds |> describe() |>
+                       select(described_variables,mean,sd,p25,p50,p75)|>
+                                                flextable()
+diamonds$Ivalue = ifelse(is.na(diamonds$carat),ave(diamonds$carat,diamonds$cut,
+                       FUN = function(x){mode(x,na.rm=TRUE)}),diamonds$carat)
+ODC=diamonds[order(diamonds$cut,diamonds$Ivalue),]
+
+## In base R When two numeric vectors of the form vector1 ~ vector2 are passed to plot(), a scatterplot is produced. If a numeric vector and a factor of the form vector ~ factor are used in plot(), boxplots are created. If the result from table() is passed to plot(), a barplot is created. Passing a single factor to plot() will produce a barplot, while passing a formula of the form factor ~ numeric.vector will create a spinogram.
+
+## When a numeric vector and a factor are used with plot(), a stripchart is created. If two factors are passed, a spineplot is created. When a two-dimensional table is used in plot(), a mosaic plot is made. If a time-series object is passed, a time-series graph is produced.
+
+plot(diamonds$cut,diamonds$carat)                                                                         # Box plot
+plot(diamonds$clarity)                                                                                    # Bar plot
+with(diamonds,plot(diamonds$cut~diamonds$price,main="Spinogram"))                                         # Spinogram
+with(diamonds, plot(diamonds$x~diamonds$color,main="Box plot",xkab="color",ylab="x"))                     # Box plot
+with(diamonds, plot(table(diamonds$color,diamonds$cut), main="Mosaic plot", xlab="color",ylab="cut"))     # Mosaic plot
+
+text(0, 16, "Some Red Text", col = "red")
+text(0, 10, expression(paste("Some Math: ", bar(x)==sum(frac(x[i], n), i==1, n))))
+
+library(PASWR2)
+data(VIT2005)
+View(VIT2005)
+attach(VIT2005)
+library(tidyverse)
+AB=
+VIT2005 |>
+         filter( totalprice > 400000 )|>
+                        filter(garage==1)
+
+count(AB)                              # solved
+VIT2005[c(totalprice>400000),] |> filter(garage==1)
+
+wheatspain=data.frame( wheat.surface=c(18817,65,440,25143,66326,34214,311479,74206),
+                        community=c("Castilla_y_Leon","Madrid","Castilla-La_Mancha",
+"C_Valenciana","Region_de_Murcia","Extremadura","Andalicia","Islas_Canaris"))
+VIT2005[c(totalprice>400000),] |> filter(garage==1)
+
+###---------------------------- DIAGONASIS --------------------------------- ####
+
+
+
+normality(diamonds) |> flextable()        # p value is too small for each variable
+attach(diamonds)
+find_outliers(diamonds)                   # outliers are present
+
+find_outliers(VIT2005)                    # yes outliers present
+find_na(diamonds) 
+find_na(VIT2005)
+diagnose_category(diamonds)|> flextable()
+diagnose_numeric(diamonds) |> flextable()
+diagnose(diamonds,carat)|> flextable()
+diagnose_category(VIT2005) |> flextable()
+diagnose_numeric(VIT2005) |> flextable()
+diagnose_outlier(diamonds) |> flextable()
+diagnose_outlier(VIT2005) |> flextable()
+# this is how simple Diagnosis works
+
+```
+
+Lets come to - :)
+```{r}
+###------------------------simple EDA -------------------------------- ###
+
+# for UNIVARIATE 
+
+describe(diamonds)                    # 'describe' applied to numerical variable only an object of class "c('ordered', 'factor')"
+describe(VIT2005) |> flextable()
+
+diamonds |> describe(c(table,price,x))
+VIT2005 |> describe(c(area,floor,toilets,elevator))  |> flextable() 
+VIT2005 |> describe(c(garage,rooms),statistics=c("n","na","se_mean","IQR","sd","skewness","mean","p50"))             
+
+diamonds |> group_by(clarity) |> describe() 
+VIT2005 |> group_by(out) |>select(totalprice) |> describe()
+
+VIT2005 |> univar_numeric(area)
+diamonds |> univar_numeric(c(carat,table))             # calculate all necessary descreptive statistics 
+diamonds |> univar_category(c(cut,clarity))
+
+
+# Bivariate EDA #
+VIT2005 |> correlate() |> filter(coef_corr > 0.6) |> flextable() 
+diamonds |> correlate() |> filter(coef_corr < 0) |> flextable()
+diamonds |> correlate(carat,table,x,y,z) |> filter( abs(coef_corr) > 0.45)
+plot_correlate(VIT2005,method="kendall")           # Note that we use "kendall" method of correlation when outliers are present in data or data is ranked
+plot_correlate(diamonds,method="pearson")          # very good way to find correlation
+   
+
+
+```
+
+```{r}
+#________________________________________________________________________________________________________________
+
+            ######----------------------------- TRansformation -------------------------------- ###### 
+                       #  we need to transform data when data dont follow normal dist.
+#_______________________________________________________________________________________________________________
+
+library(e1071)
+skewness(diamonds$carat)
+kurtosis(VIT2005$area)
+normality(diamonds) |> filter(p_value < 0.05)|> flextable()
+VIT2005 |> plot_normality(area)
+diamonds |> plot_normality(price,table)
+
+T=transform(price,method="Box-Cox");plot(T)
+T1=transform(diamonds$y,method="log+1");plot(T1)
+T2=transform(c(diamonds$x,diamonds$y),method="Box-Cox");plot(T2)
+T3=transform(carat,method="Yeo-Johnson");plot(T3)          # "minmax"
+```
+

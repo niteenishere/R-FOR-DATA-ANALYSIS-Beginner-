@@ -1,0 +1,323 @@
+---
+title: "Probability distributions plots for visual identification (for different parameters)"
+author: "Mr.Pardeshi"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+
+## Including Plots
+
+## Exponential distribution (scale parameter) plots for different scale parameters:
+```{r}
+# this is our interest
+n2=50
+list_r2=list()
+y=c()
+library(tibble)
+k=c(1,13,50)
+J=c(0.1,1,2,3)  # rates 
+
+for( j in 1:length(J)){
+   r=rexp(500,rate=J[j])
+   list_r2[[j]]=r
+}
+color=c("blue","black","gold","orange")
+plot(density(list_r2[[1]]),lwd=2,col="blue",main="Density plot of exp for same r.n size but diff rates" )
+for (i in 2:4){
+lines(density(list_r2[[i]]),lwd=2,col=color[i])
+legend("topright",legend=paste("rate=",J),fill=c("blue","black","gold","orange"))
+}
+```
+
+
+## Exponential distribution (location parameter) plots for different location parameters:
+
+```{r}
+n2=500
+list_r3=list()
+y=c()
+library(tibble)
+k=c(1,13,50)
+J1=c(0,1,2,3)
+
+for( j in 1:length(J1)){
+   r=rexp(500,rate=0.5) + J1[j]
+   list_r3[[j]]=r
+}
+color=c("blue","black","gold","orange")
+plot(density(list_r3[[1]]),lwd=2,col="blue",main="Density plot of exp for same rates but diff locations" )
+for (i in 2:4){
+lines(density(list_r3[[i]]),lwd=2,col=color[i])
+legend("topright",legend=paste("location=",J1),fill=c("blue","black","gold","orange"))
+}
+```
+
+```{r}
+# for cauchy distribution (scale parameter)
+n=50
+list_r3=list()
+y=c()
+J=c(0.09,0.25,0.73,1)
+
+  for( j in 1:length(J)){
+   r=(rcauchy(n,0,J[j]))  # scale parameter is > 0 always
+   list_r3[[j]]=r
+  }
+D4=data.frame('s1'=(list_r3[[1]]),'s2'=(list_r3[[2]]),'s3'=(list_r3[[3]]),'s4'=(list_r3[[4]]))
+library(ggplot2)
+library(tidyverse)
+D4_long=D4 |> pivot_longer(cols=everything (),names_to='Series',values_to='Values')
+
+fig2=ggplot(D4)+
+geom_density(aes(s1),fill='blue',lwd=1)+
+  geom_density(aes(s2),fill='skyblue',lwd=1)+
+  geom_density(aes(s3),fill='navy',lwd=1)+
+  geom_density(aes(s4),fill='orange',lwd=1)+
+  labs(title='Density plot of cauchy distribution with respect to different location parameter',
+       x='Values',
+       y='Density',
+       color='Series')+
+  coord_cartesian(xlim=c(-10,10))
+  theme_minimal()
+library(plotly)
+ggplotly(fig2)
+
+
+
+```
+
+## Cauchy for location parameter
+```{r}
+# for cauchy distribution (location parameter)
+n=50
+list_r4=list()
+J=c(0,1,2,5)
+
+  for( j in 1:length(J)){
+   r=(rcauchy(n,J[j],1))  # location parameter is > 0 always
+   list_r4[[j]]=r
+  }
+D=data.frame('s1'=(list_r4[[1]]),'s2'=(list_r4[[2]]),'s3'=(list_r4[[3]]),'s4'=(list_r4[[4]]))
+library(ggplot2)
+library(tidyverse)
+D_long=D |> pivot_longer(cols=everything (),names_to='Series',values_to='Values')
+
+fig3=ggplot(D)+
+geom_density(aes(s1),fill='darkred',lwd=1)+
+  geom_density(aes(s2),fill='skyblue',lwd=1)+
+  geom_density(aes(s3),fill='navy',lwd=1)+
+  geom_density(aes(s4),fill='orange',lwd=1)+
+  labs(title='Density plot of cauchy distribution with respect to different location parameter',
+       x='Values',
+       y='Density',
+       color='Series')+
+  coord_cartesian(xlim=c(-30,30))
+  theme_minimal()
+library(plotly)
+ggplotly(fig3)
+
+
+```
+
+## Cauchy distribution plots for different locations andd scale parameter
+```{r}
+# for cauchy distribution (location and scale parameter)
+n=50
+list_r4=list()
+J=c(0,1,2,5)
+S=c(0.09,0.25,0.73,1)
+for (i in 1:length(S)){
+  for( j in 1:length(J)){
+   r=(rcauchy(n,J[j],S[i[]]))  # location parameter is > 0 always
+   list_r4[[j]]=r
+}}
+color=c("blue","black","gold","orange")
+plot(density(list_r4[[1]]),lwd=3,col="blue",main="Density plot of cauchy at diff scales and locations" ,xlim=c(-60,60))
+for (i in 2:4){
+lines(density(list_r4[[i]]),lwd=3,col=color[i])
+legend("topright",legend=paste("location=",J),fill=c("blue","black","gold","orange"))
+}
+
+```
+
+## Gamma distribution plots for different shapes but constant rates
+```{r}
+n=100
+list_r5=list()
+y=c()
+S=c(0.1,1,2,3)
+
+  for( j in 1:length(J)){
+   r=(rgamma(n,S[j],1))  # shape parameter >0  rate parameter =1 , scale =1/rate
+   list_r5[[j]]=r
+  }
+D2=data.frame('s1'=(list_r5[[1]]),'s2'=(list_r5[[2]]),'s3'=(list_r5[[3]]),'s4'=(list_r5[[4]]))
+library(ggplot2)
+library(tidyverse)
+D2_long=D2 |> pivot_longer(cols=everything (),names_to='Series',values_to='Values')
+
+fig_1=ggplot(D2)+
+geom_density(aes(s1),fill='darkblue',lwd=1)+
+  geom_density(aes(s2),fill='blue',lwd=1)+
+  geom_density(aes(s3),fill='skyblue',lwd=1)+
+  geom_density(aes(s4),fill='orange',lwd=1)+
+  labs(title='Density plot of gamma distribution with respect to different shape but constant rate parameter',
+       x='Values',
+       y='Density',
+       color='Series')+
+  coord_cartesian(xlim=c(0,2),ylim=c(0,3))
+  theme_minimal()
+library(plotly)
+ggplotly(fig_1)
+
+
+
+```
+
+## Gamma distribution for different rates but constant shape
+```{r}
+n=100
+list_r6=list()
+y=c()
+S=c(0.09,0.25,0.73,0.99)
+
+  for( j in 1:length(J)){
+   r=(rgamma(n,1,R[j]))  # shape parameter >0  rate parameter =1 , scale =1/rate
+   list_r6[[j]]=r
+}
+color=c("blue","darkblue","gold",'green')
+plot(density(list_r[[1]]),lwd=3,col="blue",main="Density plot of gamma dist at diff shape & rate",xlim=c(-10,10) )
+for (i in 2:3){
+lines(density(list_r6[[i]]),lwd=3,col=color[i])
+legend("topright",legend=paste("Shape=",S),fill=c("blue","darkblue","gold",'green'))
+}
+```
+
+
+```{r}
+# for gamma distribution for different shape and rates
+
+n=100
+list_r5=list()
+y=c()
+R=c(0.5,1,2,3)
+S=c(0,1,2,3)
+
+  for( j in 1:length(J)){
+   r=(rgamma(n,S[j],J[j]))  # shape parameter >0 & rate parameter >0
+   list_r5[[j]]=r
+  }
+
+D3=data.frame('s1'=(list_r5[[1]]),'s2'=(list_r5[[2]]),'s3'=(list_r5[[3]]),'s4'=(list_r5[[4]]))
+library(ggplot2)
+library(tidyverse)
+D3_long=D3 |> pivot_longer(cols=everything (),names_to='Series',values_to='Values')
+
+ggplot(D3)+
+geom_density(aes(s1),fill='darkred',lwd=1)+
+  geom_density(aes(s2),fill='skyblue',lwd=1)+
+  geom_density(aes(s3),fill='navy',lwd=1)+
+  geom_density(aes(s4),fill='orange',lwd=1)+
+  labs(title='Density plot of gamma distribution with respect to different rate and shape parameter',
+       x='Values',
+       y='Density',
+       color='Series')+
+  coord_cartesian(xlim=c(-2,6))
+  theme_minimal()
+
+
+```
+
+```{r}
+# for beta distributions
+
+n=100
+list_r=list()
+y=c()
+S1=c(0,2,1)
+S2=c(0,1,2)
+
+  for( j in 1:length(S1)){
+   r=(rgamma(n,S1[j],S2[j]))  # shape1 parameter >0 for success & shape2 parameter >0 for failure
+   list_r[[j]]=r
+}
+color=c("blue","black","gold")
+plot(density(list_r[[1]]),lwd=2,col="blue",main="Density plot of beta dist at diff shape1 & shape2" )
+for (i in 2:3){
+lines(density(list_r[[i]]),lwd=2,col=color[i])
+legend("topright",legend=c(paste("shape1=",S1),paste("Shape2=",S2)),fill=c("blue","black","gold"))
+}
+
+```
+
+```{r}
+# Plots of  Poisson distribution for different lambda's
+n=50
+list_r=list()
+lambda=c(0.1,1.5,2.19,5)
+  for( j in 1:length(lambda)){
+   r=(rpois(n,lambda[j]))  # shape1 parameter >0 for success & shape2 parameter >0 for failure
+   list_r[[j]]=r
+  }
+D1=data.frame('s1'=(list_r[[1]]),'s2'=(list_r[[2]]),'s3'=(list_r[[3]]),'s4'=(list_r[[4]]))
+library(ggplot2)
+library(tidyverse)
+D1_long=D1 |> pivot_longer(cols=everything (),names_to='Series',values_to='Values')
+
+fig4=ggplot(D1)+
+geom_density(aes(s1),fill='darkgreen',lwd=1)+
+  geom_density(aes(s2),fill='green',lwd=1)+
+  geom_density(aes(s3),fill='lightgreen',lwd=1)+
+  geom_density(aes(s4),fill='green4',lwd=1)+
+  labs(title='Density plot of poisson distribution with respect to different parameter',
+       x='Values',
+       y='Density',
+       color='Series')+
+  theme_minimal()
+library(plotly)
+ggplotly(fig4)
+
+
+
+```
+
+## Plot for binomial distribution
+```{r}
+
+# Plots of  Poisson distribution for different lambda's
+n=50
+list_r6=list()
+p=c(0.12,0.25,0.56,0.89)
+  for( j in 1:length(lambda)){
+   r=(rbinom(n,1000,p[j]))  # shape1 parameter >0 for success & shape2 parameter >0 for failure
+   list_r6[[j]]=r
+  }
+D1=data.frame('s1'=(list_r6[[1]]),'s2'=(list_r6[[2]]),'s3'=(list_r6[[3]]),'s4'=(list_r6[[4]]))
+library(plotly)
+library(tidyverse)
+D1_long=D1 |> pivot_longer(cols=everything (),names_to='Series',values_to='Values')
+fig = plot_ly()
+fig = fig |>
+    add_trace(x=D1$s1,type='histogram',histnorm='probability density',name='s1',opacity=0.6) |>
+  add_trace(x=D1$s2,type='histogram',histnorm='probability density',name='s2',opacity=0.6) |>
+  add_trace(x=D1$s3,type='histogram',histnorm='probability density',name='s3',opacity=0.6) |>
+  add_trace(x=D1$s4,type='histogram',histnorm='probability density',name='s4',opacity=0.6) 
+fig
+   
+   
+   
+
+
+```
+
+
